@@ -1,5 +1,5 @@
-#include <Engine/Shader.hxx>
-#include <Engine/stb_image.h>
+#include <Engine.hxx>
+#include <iostream>
 
 using namespace engine;
 
@@ -12,28 +12,14 @@ using namespace engine;
 //, ███████  ██████  ██   ██  ██████  ██   ██ ███████     ███████  ██████  ███████ ██ ██████
 //,####################################################################################################################
 //,####################################################################################################################
-void __Shader_Generic_Object_Sqaure_Solid__onLoad(Shader* shader)
+float Phase = 0.5;
+float PhaseSpeed = 0.0025;
+void __Shader_Generic_Object_Sqaure_Solid__onLoad(Shader* shader, uint64_t zplane)
 {
-	//,
-	//,	load texture atlas
-	//,
-	GLuint texture;
-	{
-		int imgWidth, imgHeight, colorChannelCount;
-		unsigned char* bytes = stbi_load("./assets/Textures/TestAtlas.png",&imgWidth,&imgHeight,&colorChannelCount,0);
-		glGenTextures(1,&texture);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D,texture);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,imgWidth,imgHeight,0,GL_RGBA,GL_UNSIGNED_BYTE,bytes);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		stbi_image_free(bytes);
-		GLuint AtlasUni = glGetUniformLocation(shader->ShaderProgram,"TextureAtlas");
-		glUniform1i(AtlasUni,0);
-	}
+	//std::cout << "support shader load, zplane: " << zplane << std::endl;
+	computeLightingForShaderOnZPlane(shader,zplane);
+	Phase+=PhaseSpeed;
+	if(Phase <= 0.5 || Phase >= 0.6)PhaseSpeed *= -1;
 }
 
 Shader __Shader_Generic_Object_Sqaure_Solid(

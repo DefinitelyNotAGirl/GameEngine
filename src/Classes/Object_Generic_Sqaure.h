@@ -1,7 +1,3 @@
-#define ClassName "Class.Level.Lava"
-#define ATLAS_POS_X 17
-#define ATLAS_POS_Y 23
-
 #define ENGINE_BACKEND
 #include <Engine.hxx>
 #include <iostream>
@@ -13,24 +9,29 @@ static void RenderAll(std::vector<Object*>& Objects, uint64_t zplane);
 #ifndef ClassName
 	#error please define a class name
 #endif
+#if defined(ATTRIBUTE_SOLID)
+	#define LOCAL_CLASS_SOLID true
+#else
+	#define LOCAL_CLASS_SOLID false
+#endif
 #define LOCAL_CLASS_TRANSPARENCY 0.0f
 #define LocalClassName ClassName
 extern Shader __Shader_Generic_Object_Sqaure_Solid;
 static LightingProperties_T LightingProperties(
-	rgba(1.0f,0.25f,0.0f,1.0f),
+	rgba(0,0,0,0),
 	0.0,
 	0.2,
-	(1<<0)|(1<<1)|(1<<2),
-	rgba(1.0f,0.2f,1.0f,LOCAL_CLASS_TRANSPARENCY),
+	ENGINE_ZPLANE_NATURAL,
+	rgba(0xFF,0xFF,0xFF,LOCAL_CLASS_TRANSPARENCY),
 	0.0,
-	1.125f
+	0.0
 );
 static PhysicsProperties_T PhysicsProperties(
 	1.0,
-	0.7,
+	1.0,
 	0.0,
 	0.0,
-	0.8
+	1.0
 );
 static ObjectClass localClass(
 	LocalClassName,
@@ -40,7 +41,7 @@ static ObjectClass localClass(
 	&PhysicsProperties,
 	false,
 	nullptr,
-	true,
+	false,
 	&RenderAll,
 	&LoopAll,
 	&PushObject

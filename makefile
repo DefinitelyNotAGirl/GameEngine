@@ -39,10 +39,10 @@ build/%.o: src/%.s
 	@$(AS) $(ASARGS) -MD -c -o $@ $<
 	$(info  	$(AS)	$<)
 build/%.o: src/%.cpp
-	@$(CXX) -O0 $(CXXARGS) -std=c++20 -Wno-write-strings -rdynamic -pedantic -Wunreachable-code -Wno-literal-suffix -Wno-pointer-arith -MP -MD -fpermissive -Iinc/ -g -c -o $@ $<
+	@$(CXX) -O3 $(CXXARGS) -std=c++20 -Wno-write-strings -rdynamic -pedantic -Wno-conversion-null -Wno-narrowing -Wunreachable-code -Wno-literal-suffix -Wno-pointer-arith -MP -MD -fpermissive -Iinc/ -g -c -o $@ $<
 	$(info 	$(CXX)	$<)
 build/%.o: src/%.cxx
-	@$(CXX) -O0 $(CXXARGS) -std=c++20 -Wno-write-strings -rdynamic -pedantic -Wno-multichar -Wunreachable-code -Wno-literal-suffix -Wno-pointer-arith -MP -MD -fpermissive -Iinc/ -g -c -o $@ $<
+	@$(CXX) -O3 $(CXXARGS) -std=c++20 -Wno-write-strings -rdynamic -pedantic -Wno-conversion-null -Wno-narrowing -Wno-multichar -Wunreachable-code -Wno-literal-suffix -Wno-pointer-arith -MP -MD -fpermissive -Iinc/ -g -c -o $@ $<
 	$(info 	$(CXX)	$<)
 build/%.o: src/%.c
 	@$(CC) $(CCARGS) -Wunreachable-code -Iinc/ -c -o $@ $<

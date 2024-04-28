@@ -14,6 +14,7 @@ namespace engine
 	public:
 		double x;
 		double y;
+		RenderPosition2D();
 		RenderPosition2D(double x,double y);
 		/**
 		 * @throws Throws a BadCurrentWindowException if currentWindow is nullptr or if either currentWindow->Width or currentWindow->Height are either 0 or >1.000.000.000

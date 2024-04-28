@@ -10,9 +10,26 @@ namespace engine
 {
 	void LoadBaseShaders();
 	void init();
-	void PushObject(ObjectClass* c,Object* obj);
+	void PushObjectGlobal(Object* obj);
 	void PushObjectClass(ObjectClass* c);
 	ObjectClass* getObjectClass(char* classname);
+	void computeLightingForShaderOnZPlane(Shader* shader,uint64_t zplane);
+	void setZPlaneCount(uint64_t count);
+	//, ██    ██ ███████ ███████ ██████      ██ ███    ██ ██████  ██    ██ ████████
+	//, ██    ██ ██      ██      ██   ██     ██ ████   ██ ██   ██ ██    ██    ██
+	//, ██    ██ ███████ █████   ██████      ██ ██ ██  ██ ██████  ██    ██    ██
+	//, ██    ██      ██ ██      ██   ██     ██ ██  ██ ██ ██      ██    ██    ██
+	//,  ██████  ███████ ███████ ██   ██     ██ ██   ████ ██       ██████     ██
+	typedef void(*keyCallbackT)();
+	void setKeyUpCallback(int key,keyCallbackT function);
+	void setKeyDownCallback(int key,keyCallbackT function);
+	void initKeyCallbacks(window* win);
+	//, ███████ ██ ███    ███ ██████  ██      ███████
+	//, ██      ██ ████  ████ ██   ██ ██      ██
+	//, ███████ ██ ██ ████ ██ ██████  ██      █████
+	//,      ██ ██ ██  ██  ██ ██      ██      ██
+	//, ███████ ██ ██      ██ ██      ███████ ███████
+	void simpleLoadTexture(char* file, GLenum slot);
 	//, ██████  ██████   █████  ██     ██
 	//, ██   ██ ██   ██ ██   ██ ██     ██
 	//, ██   ██ ██████  ███████ ██  █  ██

@@ -1,4 +1,5 @@
 #include <Engine/Object.hxx>
+#include <Engine/ObjectClass.hxx>
 
 namespace engine
 {
@@ -6,18 +7,18 @@ namespace engine
 		Position2D Pos,
 		Size2D Size,
 		Size2D Hitbox,
-		bool hasGravity,
-		bool hasColision,
+		uint64_t zplane,
 		void* classData,
 		ObjectClass* oclass
 	):
 	Pos(Pos),
 	Size(Size),
 	Hitbox(Hitbox),
-	hasGravity(hasGravity),
-	hasColision(hasColision),
+	zplane(zplane),
 	classData(classData),
 	oclass(oclass)
 	{
+		this->LightingProperties = this->oclass->LightingProperties;
+		this->PhysicsProperties = this->oclass->PhysicsProperties;
 	}
 }

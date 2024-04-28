@@ -15,6 +15,8 @@ namespace engine
 	Position2D::Position2D(uint64_t x, uint64_t y)
 		:x(x),y(y){}
 
+	RenderPosition2D::RenderPosition2D(){}
+
 	RenderPosition2D::RenderPosition2D(double x, double y)
 		:x(x),y(y){}
 

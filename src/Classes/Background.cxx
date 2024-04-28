@@ -6,7 +6,7 @@ using namespace engine;
 
 static void PushObject(Object* obj);
 static void LoopAll(std::vector<Object*>& Objects);
-static void RenderAll(std::vector<Object*>& Objects);
+static void RenderAll(std::vector<Object*>& Objects, uint64_t zplane);
 
 #define LocalClassName "Class.Map.Background"
 static Shader LocalShader(
@@ -19,14 +19,21 @@ static LightingProperties_T LightingProperties(
 	rgba(0,0,0,0),
 	0.0,
 	0.2,
+	ENGINE_ZPLANE_ALL,
 	rgba(0xFF,0xFF,0xFF,0xFF),
+	0.0,
 	0.0
 );
+static PhysicsProperties_T PhysicsProperties(0.0,0.0,0.0,0.0,0.0);
 static ObjectClass localClass(
 	LocalClassName,
 	nullptr,
 	&LocalShader,
 	&LightingProperties,
+	&PhysicsProperties,
+	false,
+	nullptr,
+	false,
 	&RenderAll,
 	&LoopAll,
 	&PushObject
@@ -75,7 +82,7 @@ static void drawSqaure(Position2D pos,Size2D size)
 static float frame = 0.0;
 static float frame_step = 0.1;
 static float ftime = 0;
-static void RenderAll(std::vector<Object*>& Objects)
+static void RenderAll(std::vector<Object*>& Objects, uint64_t zplane)
 {
 	ftime++;
 	GLuint shaderFrame = glGetUniformLocation(LocalShader.ShaderProgram,"frame");
@@ -85,12 +92,11 @@ static void RenderAll(std::vector<Object*>& Objects)
 	frame+=frame_step;
 	if(frame >= 1.0 || frame <= -1.0)
 		frame_step *= -1;
-	//for(uint64_t i = 0;i<Objects.size();i++)
-	//{
-	//	Object* obj = Objects[i];
-	//	__drawSqaureTexture(obj->Pos,obj->Size,"./assets/Textures/background.png");
-	//}
-	drawSqaure(Objects[0]->Pos,Objects[0]->Size);
+	for(uint64_t i = 0;i<Objects.size();i++)
+	{
+		Object* obj = Objects[i];
+		drawSqaure(Objects[0]->Pos,Objects[0]->Size);
+	}
 }
 
 static void LoopAll(std::vector<Object*>& Objects)

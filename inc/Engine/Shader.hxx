@@ -11,6 +11,8 @@
 
 namespace engine
 {
+	class Shader;
+	typedef void(*shaderOnLoad)(Shader* shader,uint64_t zplane);
 	class Shader {
 	backend:
 		std::vector<std::string> sourceFiles;
@@ -20,12 +22,12 @@ namespace engine
 		GLuint ShaderProgram = NULL;
 	public:
 		Shader(char* name);
-		Shader(char* vertFile,char* fragFile,char* name,void(*onLoad)(Shader* shader));
+		Shader(char* vertFile,char* fragFile,char* name,shaderOnLoad onLoad);
 		Shader();
-		void compile();
-		void compile(char* vertFile,char* fragFile);
+		void compile(bool useDefaultShaders = true);
+		void compile(char* vertFile,char* fragFile,bool useDefaultShaders = true);
 		void activate();
-		void (*onLoad)(Shader* shader) = nullptr;
+		shaderOnLoad onLoad = nullptr;
 	};
 
 	namespace shaders

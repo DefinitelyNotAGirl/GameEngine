@@ -65,6 +65,24 @@ namespace engine
 		fclose(f);
 		return data;
 	}
+	static void attachShader(GLuint program, char* file,GLenum type,std::vector<GLuint>& shaders)
+	{
+		if(options::ddebug)std::cout << "    " << file << std::endl;
+		GLuint shader = glCreateShader(type);
+		char* source;
+		try {
+			source = ReadFileContent(file);
+		} catch(FileOpenException e) {
+			throw FileOpenException("[ENGINE] Failed to open shader source file!",e.file);
+		} catch(FileReadException e) {
+			throw FileReadException("[ENGINE] Failed to read shader source file!",e.file,e.start,e.requested,e.received,e.size);
+		}
+		glShaderSource(shader,1,&source,NULL);
+		glCompileShader(shader);
+		glAttachShader(program,shader);
+		shaders.push_back(shader);
+		free(source);
+	}
 	//, ███████ ██   ██  █████  ██████  ███████ ██████       ██████ ██       █████  ███████ ███████
 	//, ██      ██   ██ ██   ██ ██   ██ ██      ██   ██     ██      ██      ██   ██ ██      ██
 	//, ███████ ███████ ███████ ██   ██ █████   ██████      ██      ██      ███████ ███████ ███████
@@ -74,91 +92,48 @@ namespace engine
 	Shader::Shader(char* name)
 		:name(name){}
 
-	Shader::Shader(char* vertFile,char* fragFile,char* name,void(*onLoad)(Shader* shader))
+	Shader::Shader(char* vertFile,char* fragFile,char* name,shaderOnLoad onLoad)
 		:name(name),vertFile(vertFile),fragFile(fragFile),onLoad(onLoad){}
 
-	void Shader::compile()
+	void Shader::compile(bool useDefaultShaders)
 	{
-		this->compile(this->vertFile,this->fragFile);
+		this->compile(this->vertFile,this->fragFile,useDefaultShaders);
 	}
 
-	void Shader::compile(char* vertFile,char* fragFile)
+	void Shader::compile(char* vertFile,char* fragFile,bool useDefaultShaders)
 	{
 		if(this->ShaderProgram != NULL)return;
 		if(options::ddebug)std::cout << "Compiling Shader: " << this->name << std::endl;
 		this->sourceFiles.push_back(std::string(vertFile));
 		this->sourceFiles.push_back(std::string(fragFile));
-		//,
-		//, get vertex shader
-		//,
-		GLuint vertexShader;
+		if(useDefaultShaders)
 		{
-			if(options::ddebug)std::cout << "    vertex shader: " << vertFile << std::endl;
-			vertexShader = glCreateShader(GL_VERTEX_SHADER);
-			char* source;
-			try {
-				source = ReadFileContent(vertFile);
-			} catch(FileOpenException e) {
-				throw FileOpenException("[ENGINE] Failed to open vertex shader source file!",e.file);
-			} catch(FileReadException e) {
-				throw FileReadException("[ENGINE] Failed to read vertex shader source file!",e.file,e.start,e.requested,e.received,e.size);
-			}
-			glShaderSource(vertexShader,1,&source,NULL);
-			glCompileShader(vertexShader);
-			free(source);
+			this->sourceFiles.push_back(std::string("./assets/shaders/Engine/Lighting.frag"));
 		}
-		//,
-		//, get fragment shader
-		//,
-		GLuint fragmentShader;
+
+		std::vector<GLuint> shaders;
+		GLuint shaderProgram = glCreateProgram();
+		//, attach shaders
+		attachShader(shaderProgram,vertFile,GL_VERTEX_SHADER,shaders);
+		attachShader(shaderProgram,fragFile,GL_FRAGMENT_SHADER,shaders);
+		if(useDefaultShaders)
 		{
-			if(options::ddebug)std::cout << "    fragment shader: " << fragFile << std::endl;
-			fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-			char* source;
-			try {
-				source = ReadFileContent(fragFile);
-			} catch(FileOpenException e) {
-				throw FileOpenException("[ENGINE] Failed to open fragment shader source file!",e.file);
-			} catch(FileReadException e) {
-				throw FileReadException("[ENGINE] Failed to read fragment shader source file!",e.file,e.start,e.requested,e.received,e.size);
-			}
-			glShaderSource(fragmentShader,1,&source,NULL);
-			glCompileShader(fragmentShader);
-			free(source);
+			attachShader(shaderProgram,"./assets/shaders/Engine/Lighting.frag",GL_FRAGMENT_SHADER,shaders);
 		}
-		//,
-		//, get shader program
-		//,
+		//, link
+		if(options::ddebug)std::cout << "    Linking...";
+		glLinkProgram(shaderProgram);
+		if(checkLinkSuccessful(shaderProgram) == false)
 		{
-			if(options::ddebug)std::cout << "    Linking...";
-			GLuint shaderProgram = glCreateProgram();
-			this->ShaderProgram = shaderProgram;
-			//+
-			//+ link
-			//+
-			{
-				glAttachShader(shaderProgram,vertexShader);
-				glAttachShader(shaderProgram,fragmentShader);
-				glLinkProgram(shaderProgram);
-			}
-			//+
-			//+ delete shaders
-			//+
-			{
-				glDeleteShader(vertexShader);
-				glDeleteShader(fragmentShader);
-			}
-			//+
-			//+ error checking
-			//+
-			{
-				if(checkLinkSuccessful(shaderProgram) == false)
-				{
-					std::cout << std::endl;
-					throw ShaderLinkException("[ENGINE] Failed to link shader",this,GetProgramInfoLog(shaderProgram));
-				}
-			}
-			if(options::ddebug)std::cout << "OK" << std::endl;
+			std::cout << std::endl;
+			throw ShaderLinkException("[ENGINE] Failed to link shader",this,GetProgramInfoLog(shaderProgram));
+		}
+		this->ShaderProgram = shaderProgram;
+		if(options::ddebug)std::cout << "OK" << std::endl;
+		//, delete shaders
+		for(GLuint shader : shaders)
+		{
+			glDeleteShader(shader);
 		}
 	}
 	void Shader::activate()

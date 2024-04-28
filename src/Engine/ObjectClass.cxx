@@ -1,5 +1,6 @@
 #include <Engine/ObjectClass.hxx>
 #include <cstring>
+#include <iostream>
 namespace engine
 {
 	ObjectClass::ObjectClass(
@@ -7,8 +8,12 @@ namespace engine
 		char* Texture,
 		Shader* shader,
 		LightingProperties_T* LightingProperties,
-		ObjectClassIterator renderAll,
-		ObjectClassIterator loopAll,
+		PhysicsProperties_T* PhysicsProperties,
+		bool computePhysics,
+		ColissionCallback_T ColissionCallback,
+		bool computeLighting,
+		ObjectClassRenderIterator renderAll,
+		ObjectClassLogicIterator loopAll,
 		PushObjectFunction push
 	):
 		Name(Name),
@@ -16,17 +21,21 @@ namespace engine
 		RenderAll(renderAll),
 		LoopAll(loopAll),
 		shader(shader),
+		computeLighting(computeLighting),
+		ColissionCallback(ColissionCallback),
+		computePhysics(computePhysics),
 		LightingProperties(LightingProperties),
+		PhysicsProperties(PhysicsProperties),
 		Push(push)
 	{
 	}
 
+	std::vector<ObjectClass*> ObjectClasses;
+
 	void ObjectClass::PushGeneric(Object* obj)
 	{
-		this->Objects.push_back(obj);
+		this->Objects[obj->zplane].push_back(obj);
 	}
-
-	std::vector<ObjectClass*> ObjectClasses;
 
 	ObjectClass* getObjectClass(char* classname)
 	{
@@ -45,9 +54,24 @@ namespace engine
 		ObjectClasses.push_back(c);
 	}
 
-	void PushObject(ObjectClass* c,Object* obj)
+	void PushObjectGlobal(Object* obj)
 	{
-		c->PushGeneric(obj);
-		c->Push(obj);
+		if(obj->LightingProperties->zplanes == ENGINE_ZPLANE_NATURAL)
+		{
+			obj->LightingProperties->zplanes = 0;
+
+			for(uint64_t i = 0;i<obj->zplane;i++)
+				obj->LightingProperties->zplanes |= (1<<i);
+		}
+		obj->oclass->PushGeneric(obj);
+		obj->oclass->Push(obj);
+	}
+
+	uint64_t zplaneCount;
+	void setZPlaneCount(uint64_t count)
+	{
+		zplaneCount = count;
+		for(ObjectClass* c : ObjectClasses)
+			c->Objects.resize(count);
 	}
 }
